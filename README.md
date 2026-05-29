@@ -127,9 +127,9 @@ cd backend
 # Create and activate a virtual environment
 python -m venv .venv
 # Windows:
-```Windows(cmd):
+Windows(cmd):
 .venv\Scripts\activate
-```Windows(powershell):
+Windows(powershell):
 .\.venv\Scripts\Activate.ps1
 # macOS/Linux:
 source .venv/bin/activate
