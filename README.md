@@ -116,7 +116,7 @@ External accounts (optional in dev — see Mock Mode below):
 ### 1. Clone and navigate
 
 ```bash
-cd LocalTravelSuggester
+cd LocalTravelSuggester_V2.0-main
 ```
 
 ### 2. Backend setup
@@ -127,7 +127,10 @@ cd backend
 # Create and activate a virtual environment
 python -m venv .venv
 # Windows:
+```Windows(cmd):
 .venv\Scripts\activate
+```Windows(powershell):
+.\.venv\Scripts\Activate.ps1
 # macOS/Linux:
 source .venv/bin/activate
 
