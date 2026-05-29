@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Runtime database (SQLite default in config)
+*.db
+*.sqlite3
+local_travel.db
+backend/local_travel.db
+
+# Environment secrets — NEVER commit
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# AWS / cloud credentials (local CLI profiles)
+.aws/
+credentials.json
+*.pem
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.*
+
+# IDE / OS
+.idea/
+.vscode/
+.cursor/settings.json
+*.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Spec Kit
+.specify/memory/__pycache__/
+
+# OpenSpec
+openspec/archive/
+
+# Interview prep (local only — not for public repo)
+docs/interview/

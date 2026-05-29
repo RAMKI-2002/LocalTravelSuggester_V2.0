@@ -1,0 +1,99 @@
+---
+description: Testing rules and conventions for LocalTravelSuggester.
+globs: ["tests/**/*.py"]
+alwaysApply: false
+---
+
+# Testing Rules
+
+## TDD Requirement
+- Write tests BEFORE implementation.
+- Tests should fail when first written. If they pass immediately, the test is testing the wrong thing or the implementation already exists.
+- Commit tests separately from implementation where possible.
+
+## Test File Structure
+```
+tests/
+  conftest.py              # fixtures shared across all tests
+  test_auth.py             # /auth/* route tests
+  test_trip.py             # /suggest-trip, /history route tests
+  test_health.py           # /health, /health/detailed route tests
+  services/
+    test_ranker.py         # services/ranker.py unit tests
+    test_intent_parser.py  # services/intent_parser.py unit tests
+```
+
+## Fixtures (conftest.py)
+```python
+@pytest.fixture
+def client():
+    """FastAPI TestClient with in-memory SQLite and LLM_MOCK=true."""
+    ...
+
+@pytest.fixture
+def auth_headers(client):
+    """Register a test user and return {'Authorization': 'Bearer <token>'}."""
+    ...
+```
+
+## HTTP Route Tests
+- Use FastAPI `TestClient` (synchronous — no `pytest.mark.asyncio` needed for route tests).
+- Set `LLM_MOCK=true` in the test environment — never make real Bedrock calls in tests.
+- Use `DATABASE_URL=sqlite:///./test.db` — never use a real PostgreSQL database in tests.
+- Mock all external HTTP calls with `respx`:
+
+```python
+import respx, httpx
+
+@respx.mock
+def test_suggest_trip(client, auth_headers):
+    respx.get("https://api.openweathermap.org/...").mock(
+        return_value=httpx.Response(200, json={...})
+    )
+    respx.get("https://places-api.foursquare.com/...").mock(
+        return_value=httpx.Response(200, json={...})
+    )
+    resp = client.post("/suggest-trip", json={...}, headers=auth_headers)
+    assert resp.status_code == 200
+```
+
+## Unit Tests (Services)
+- Services are pure Python — no HTTP, no database needed.
+- Import and call service functions directly.
+- Use `pytest.mark.parametrize` for multiple input scenarios.
+
+```python
+@pytest.mark.parametrize("prompt,expected_category", [
+    ("want to eat food", "food"),
+    ("peaceful temple", "spiritual"),
+    ("", "tourist"),
+])
+def test_parse_intent(prompt, expected_category):
+    result = parse_intent_rule_based(prompt)
+    assert result.category == expected_category
+```
+
+## Coverage
+- Run: `pytest --cov=app --cov-report=term-missing`
+- Minimum: 70% backend coverage
+- Target: 80%+ for `services/`, `api/`, `core/`
+
+## Test Naming
+- Test functions: `test_<what>_<condition>_<expected>`
+- Examples:
+  - `test_register_success`
+  - `test_register_duplicate_email_returns_409`
+  - `test_login_wrong_password_returns_401`
+  - `test_suggest_trip_without_auth_returns_401`
+  - `test_rank_places_rainy_weather_prefers_indoor`
+
+## Assertions
+- One logical assertion per test (multiple `assert` statements are fine if they test the same thing).
+- Always assert the status code before the body.
+- For JSON responses, assert specific fields rather than the entire response dict.
+
+## What NOT to Test
+- Do not test Pydantic validation directly — FastAPI handles it; test the 422 response from the route.
+- Do not test SQLAlchemy ORM internals — test that the route returns the persisted data.
+- Do not test external APIs — mock them every time.
+- Do not test `config.py` settings loading — it's declarative, not logic.

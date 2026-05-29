@@ -1,0 +1,62 @@
+---
+description: Core project rules for LocalTravelSuggester — applies to all files in this repository.
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# LocalTravelSuggester — Project Rules
+
+## Project Context
+Full-stack travel suggestion app. Backend: FastAPI + Python 3.11. Frontend: React + Tailwind via Vite. LLM: AWS Bedrock Nova Lite. DB: SQLite (dev) / PostgreSQL (prod).
+
+## Simplicity First
+- Prefer the simplest solution that satisfies the requirement.
+- Do not add abstractions unless they have an immediate, concrete benefit.
+- If a function is under 20 lines, do not extract it to a separate file just to "keep files small."
+- One class per file is not a rule. Put related small helpers in the same file.
+
+## Folder Structure (mandatory — do not deviate)
+```
+backend/app/
+  api/          # HTTP routes only — no business logic
+  core/         # security.py (JWT, hashing)
+  services/     # business logic — no HTTP, no direct DB imports
+  clients/      # external API adapters (weather, places, LLM, geocode)
+  db/           # SQLAlchemy models, session factory, cache helpers
+  schemas/      # Pydantic request/response models
+  utils/        # logger.py only
+  config.py     # Pydantic Settings
+  main.py       # FastAPI app factory + lifespan
+```
+
+## Naming Conventions
+- Python files: `snake_case.py`
+- Python classes: `PascalCase`
+- Python functions/variables: `snake_case`
+- React components: `PascalCase.jsx`
+- React files: `PascalCase.jsx` for components, `camelCase.js` for utilities
+- Constants: `UPPER_SNAKE_CASE`
+
+## Python Rules
+- Use `from __future__ import annotations` at the top of every Python file.
+- Type hints on all function signatures.
+- Prefer `Optional[X]` over `X | None` for readability.
+- Use `logging.getLogger(__name__)` in every module that logs.
+- Never use `print()` in backend code — use the logger.
+- No bare `except:` — always catch specific exceptions or at minimum `except Exception`.
+
+## Secrets & Configuration
+- All secrets come from environment variables via `config.py` (Pydantic Settings).
+- Never hardcode API keys, passwords, or secrets in any file.
+- `.env` is gitignored. `.env.example` contains placeholder values only.
+
+## Error Handling Pattern
+- Route handlers return meaningful HTTP status codes (401, 409, 422, 500).
+- Service functions raise `ValueError` for business rule violations.
+- Client functions raise `UpstreamError` for external API failures.
+- The API layer translates these to HTTP responses — services and clients do not import FastAPI.
+
+## Comments
+- Only comment non-obvious intent, tradeoffs, or constraints.
+- Do not comment what the code does — the code shows that.
+- Comments that explain *why* a design decision was made are encouraged.

@@ -1,0 +1,71 @@
+---
+description: FastAPI-specific coding rules for the LocalTravelSuggester backend.
+globs: ["backend/**/*.py"]
+alwaysApply: false
+---
+
+# FastAPI Rules
+
+## App Structure
+- Use `create_app()` factory function in `main.py`. Do not use a module-level `app = FastAPI()` without a factory.
+- Use `@asynccontextmanager` lifespan for startup/shutdown logic (not deprecated `@app.on_event`).
+- Register all routers in `create_app()`. Do not scatter `app.include_router()` across files.
+
+## Route Functions
+- Route functions must be `async def`.
+- Route functions do only three things: parse input, call service, return output.
+- No business logic in route functions. No direct database queries in route functions.
+- Use `Depends()` for: database session (`get_db`), current user (`get_current_user`).
+
+```python
+# Good
+@router.post("/suggest-trip")
+async def suggest_trip(req: TripRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return await trip_service.suggest_trip(db, req, user.id)
+
+# Bad — business logic in route
+@router.post("/suggest-trip")
+async def suggest_trip(req: TripRequest, db: Session = Depends(get_db)):
+    weather = await WeatherClient(db).get(req.city)
+    places = await PlacesClient(db).search(req.city)
+    ...  # this belongs in trip_service
+```
+
+## Pydantic Models (v2)
+- Use `model_config = ConfigDict(...)` not the old `class Config`.
+- Use `Field(...)` for validation constraints.
+- Use `model_dump()` not `.dict()` (deprecated in v2).
+- Response models go in `schemas/`; they are separate from ORM models.
+
+## Dependency Injection
+- `get_db()` yields a SQLAlchemy session and closes it in `finally`.
+- `get_current_user()` decodes JWT, queries user from DB, raises `HTTPException(401)` on failure.
+- Both are in their respective modules (`db/database.py` and `core/security.py`).
+
+## HTTP Status Codes
+- 200: success (default)
+- 201: resource created (register endpoint)
+- 401: authentication failure (bad/missing token, wrong password)
+- 409: conflict (duplicate email/username)
+- 422: validation failure (automatic from Pydantic — do not override)
+- 500: unexpected server error (never raised explicitly — let the default handler catch it)
+
+## Security
+- Protected routes use `Depends(get_current_user)`.
+- Auth routes (register, login) are public — do NOT add `get_current_user` to them.
+- Never log passwords, tokens, or secret keys.
+
+## CORS
+- In development: allow `http://localhost:5173` (Vite default port).
+- In production: restrict to the actual frontend domain.
+- Configure in `main.py` using `CORSMiddleware`.
+
+## Async Patterns
+- Use `asyncio.gather()` for independent parallel tasks.
+- Use `asyncio.to_thread()` for synchronous blocking calls (boto3 Bedrock, etc.).
+- Do not use `asyncio.run()` inside route handlers — the event loop is already running.
+
+## OpenAPI
+- Every route has `tags=[...]` for logical grouping in `/docs`.
+- Every public route schema model has at least one `examples` value in `Field(...)`.
+- Internal/UI routes use `include_in_schema=False`.
