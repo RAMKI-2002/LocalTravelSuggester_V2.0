@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { suggestTrip } from '../api'
+import { suggestTrip, addFavorite } from '../api'
 
 // Leaflet icon fix for Vite (default icon URLs break in bundled builds)
 delete L.Icon.Default.prototype._getIconUrl
@@ -54,7 +54,31 @@ function MetaBadges({ meta }) {
   )
 }
 
-function SuggestionCard({ suggestion, index }) {
+function SuggestionCard({ suggestion, index, city, savedNames, onSaved }) {
+  const [saveMsg, setSaveMsg] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const isSaved = savedNames.has(suggestion.name)
+
+  async function handleSave() {
+    if (!city || saving || isSaved) return
+    setSaving(true)
+    setSaveMsg(null)
+    try {
+      await addFavorite(suggestion, city)
+      onSaved(suggestion.name)
+      setSaveMsg('Saved')
+    } catch (err) {
+      if (err.status === 409) {
+        onSaved(suggestion.name)
+        setSaveMsg('Already saved')
+      } else {
+        setSaveMsg(err.message)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-3">
@@ -62,7 +86,23 @@ function SuggestionCard({ suggestion, index }) {
           {index + 1}
         </span>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-800 text-sm">{suggestion.name}</h3>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-gray-800 text-sm">{suggestion.name}</h3>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || isSaved}
+              className={`text-lg flex-shrink-0 ${isSaved ? 'text-red-500' : 'text-gray-300 hover:text-red-400'} disabled:cursor-default`}
+              title={isSaved ? 'Saved' : 'Save place'}
+            >
+              {isSaved ? '♥' : '♡'}
+            </button>
+          </div>
+          {saveMsg && (
+            <p className={`text-xs mt-0.5 ${saveMsg === 'Already saved' ? 'text-amber-600' : saveMsg === 'Saved' ? 'text-green-600' : 'text-red-600'}`}>
+              {saveMsg}
+            </p>
+          )}
           {suggestion.categories?.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
               {suggestion.categories.slice(0, 3).map(c => (
@@ -92,6 +132,7 @@ export default function DashboardPage() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [savedNames, setSavedNames] = useState(new Set())
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -101,6 +142,7 @@ export default function DashboardPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSavedNames(new Set())
     try {
       const data = await suggestTrip({
         city: form.city,
@@ -192,7 +234,14 @@ export default function DashboardPage() {
                   {result.suggestions.length} suggestion{result.suggestions.length !== 1 ? 's' : ''} for {result.city}
                 </h3>
                 {result.suggestions.map((s, i) => (
-                  <SuggestionCard key={s.name + i} suggestion={s} index={i} />
+                  <SuggestionCard
+                    key={s.name + i}
+                    suggestion={s}
+                    index={i}
+                    city={result.city}
+                    savedNames={savedNames}
+                    onSaved={name => setSavedNames(prev => new Set(prev).add(name))}
+                  />
                 ))}
                 {result.suggestions.length === 0 && (
                   <div className="text-center py-8 text-gray-400 text-sm">

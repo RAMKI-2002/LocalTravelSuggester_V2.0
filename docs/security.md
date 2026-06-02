@@ -23,7 +23,8 @@ The rebuilt application addresses the most critical security gaps from v1.0 (no 
 
 - `/suggest-trip` requires `get_current_user` dependency → unauthenticated requests return 401
 - `/history` filters by `current_user.id` → users cannot see each other's history
-- DELETE /favorites (proposed) returns 404 for other users' resources to prevent enumeration
+- `/favorites` (GET) filters by `current_user.id` → users cannot see each other's saved places
+- `DELETE /favorites/{id}` returns **404 Not Found** (not 403) when the favorite is missing or belongs to another user — prevents ID enumeration
 
 **Remaining gap:**
 - `/health/detailed` is unauthenticated — it exposes which external services are available. Acceptable for a demo. In production, restrict to internal network or add an admin token check.

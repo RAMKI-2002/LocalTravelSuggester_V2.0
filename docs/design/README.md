@@ -10,9 +10,9 @@
 This project was built with a focus on the AI-assisted backend engineering workflow. The frontend was implemented directly in React (Vite + Tailwind) as part of Stage 4, using the API contracts already defined in `specs/local-travel-suggester/plan.md`.
 
 A dedicated UI generation tool (v0.dev, Bolt.new) was not used because:
-- The frontend is 3 pages (Login, Dashboard, History) — simple enough to implement directly
+- The frontend is 4 pages (Login, Dashboard, History, Favorites) — simple enough to implement directly
 - The API contracts were already well-defined in the technical plan before frontend work began
-- The project prioritizes backend engineering quality; the frontend is intentionally minimal (three pages)
+- The project prioritizes backend engineering quality; the frontend is intentionally minimal (four pages)
 
 ---
 
@@ -42,7 +42,7 @@ A dedicated UI generation tool (v0.dev, Bolt.new) was not used because:
 
 ```
 ┌─────────────────────────────────────┐
-│  Nav: [Dashboard] [History] [Logout] │
+│  Nav: [Dashboard] [History] [Favorites] [Logout] │
 ├────────────────────────┬────────────┤
 │  City: [__________]    │            │
 │  Pref: [__________]    │  Leaflet   │
@@ -53,6 +53,7 @@ A dedicated UI generation tool (v0.dev, Bolt.new) was not used because:
 │  │ Name, Category   │  │            │
 │  │ AI Reasoning     │  │            │
 │  │ Distance: X km   │  │            │
+│  │ [♥ Save]         │  │            │
 │  └──────────────────┘  │            │
 └────────────────────────┴────────────┘
 ```
@@ -65,7 +66,7 @@ A dedicated UI generation tool (v0.dev, Bolt.new) was not used because:
 
 ```
 ┌─────────────────────────────────────┐
-│  Nav: [Dashboard] [History] [Logout] │
+│  Nav: [Dashboard] [History] [Favorites] [Logout] │
 ├─────────────────────────────────────┤
 │  Your Trip History                  │
 │                                     │
@@ -81,6 +82,26 @@ A dedicated UI generation tool (v0.dev, Bolt.new) was not used because:
 
 ---
 
+### Page 4 — Favorites (`/favorites`)
+
+```
+┌─────────────────────────────────────┐
+│  Nav: [Dashboard] [History] [Favorites] [Logout] │
+├─────────────────────────────────────┤
+│  Saved Places                       │
+│                                     │
+│  ♥ Hussain Sagar Lake  [Remove]     │
+│  Hyderabad · lake, park             │
+│  Perfect for a peaceful evening…    │
+│                                     │
+│  (empty state: save from Dashboard) │
+└─────────────────────────────────────┘
+```
+
+**API calls:** `GET /favorites`, `DELETE /favorites/{id}`
+
+---
+
 ## API Contracts Implied by the UI
 
 These contracts were derived from UI needs and are fully implemented:
@@ -91,6 +112,9 @@ These contracts were derived from UI needs and are fully implemented:
 | Register form submit | `POST /auth/register` | `id`, `username`, `email` |
 | Dashboard form submit | `POST /suggest-trip` | `suggestions[]`, `weather`, `meta` |
 | History page load | `GET /history` | `items[]`, `count` |
+| Save place from card | `POST /favorites` | `id`, `place_name`, `city`, … |
+| Favorites page load | `GET /favorites` | `items[]`, `count` |
+| Remove favorite | `DELETE /favorites/{id}` | 204 No Content |
 | Nav: current user | `GET /auth/me` | `id`, `username`, `email` |
 
 ---

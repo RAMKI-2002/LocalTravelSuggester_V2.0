@@ -14,14 +14,14 @@ Local Travel Suggester is a full-stack web application that provides AI-curated 
 │                    Browser                           │
 │   React + Tailwind (Vite)                            │
 │   ┌──────────┐  ┌─────────────┐  ┌──────────────┐   │
-│   │LoginPage │  │DashboardPage│  │HistoryPage   │   │
+│   │LoginPage │  │DashboardPage│  │HistoryPage   │  │FavoritesPage│   │
 │   └──────────┘  └─────────────┘  └──────────────┘   │
 └────────────────────────┬────────────────────────────┘
                          │ HTTP REST (JSON) + JWT
 ┌────────────────────────▼────────────────────────────┐
 │               FastAPI Backend (uvicorn)              │
 │                                                      │
-│  /auth/*        /suggest-trip    /history  /health   │
+│  /auth/*   /suggest-trip   /history   /favorites   /health   │
 │      │                │              │         │     │
 │  AuthService    TripService     DB Query    Probes   │
 │      │                │                             │
@@ -55,6 +55,7 @@ The backend uses a strict 4-layer pattern: **API → Service → Client → DB**
 routes_auth.py ──► auth_service.py ──► db/models.py (User)
 routes_trip.py ──► trip_service.py ──► clients/* ──► external APIs
                                    └──► db/models.py (QueryHistory)
+routes_favorites.py ──► favorites_service.py ──► db/models.py (UserFavorite)
 routes_health.py ──► direct probes (no service layer needed)
 ```
 
@@ -181,17 +182,20 @@ App.jsx (router + auth guard)
 │   ├── TripForm     (city, preference, locality, max_results)
 │   ├── WeatherCard  (condition, temp, humidity)
 │   ├── SuggestionList
-│   │   └── SuggestionCard × N (name, reasoning, distance, categories)
+│   │   └── SuggestionCard × N (name, reasoning, distance, categories, save ♥)
 │   └── MapView      (react-leaflet, numbered pins, locality marker)
 │
-└── HistoryPage.jsx
-    └── HistoryList  (city, preference, date, suggestion count)
+├── HistoryPage.jsx
+│   └── HistoryList  (city, preference, date, suggestion count)
+│
+└── FavoritesPage.jsx
+    └── FavoriteList (place name, city, categories, reasoning, remove)
 ```
 
 **State management:**
 - `AuthContext` holds `{ token, user }`. Persisted to `localStorage`.
-- `DashboardPage` holds local `useState` for `{ loading, results, error }`.
-- No global state store (no Redux/Zustand needed for 3 pages).
+- `DashboardPage` holds local `useState` for `{ loading, results, error, savedNames }`.
+- No global state store (no Redux/Zustand needed for 4 pages).
 
 ---
 
@@ -206,6 +210,8 @@ SQLAlchemy 2.0 with two supported backends:
 
 The `JSON` column type maps to `JSONB` on PostgreSQL and `TEXT`-backed JSON on SQLite. The application code never branches on database type.
 
+**Tables:** `users`, `query_history`, `user_favorites`, `place_cache`, `weather_log`. Favorites are stored flat (`place_name`, `city`, `lat`, `lng`, `categories`, `reasoning`) with a unique constraint on `(user_id, place_name)`.
+
 **Why not Alembic?** For this project scale, `Base.metadata.create_all()` on startup is sufficient. Adding Alembic would require managing migration files across schema changes, which adds overhead not justified by the single-developer, demo-scope nature of this project. This is a known tradeoff, not an oversight.
 
 ---
@@ -218,7 +224,7 @@ The `JSON` column type maps to `JSONB` on PostgreSQL and `TEXT`-backed JSON on S
 | Request tracing | `RequestIdMiddleware` generates 12-char UUID per request |
 | Health checks | `/health` (liveness) + `/health/detailed` (readiness per dependency) |
 | Response metadata | `meta.elapsed_ms`, `meta.cache_hits`, `meta.degraded` in every TripResponse |
-| DB audit | `query_history` table captures every request with latency |
+| DB audit | `query_history` table captures every request with latency; `user_favorites` stores saved places |
 
 ---
 
@@ -227,8 +233,8 @@ The `JSON` column type maps to `JSONB` on PostgreSQL and `TEXT`-backed JSON on S
 | Decision | Alternative Considered | Why Rejected |
 |----------|----------------------|-------------|
 | Single `LLMClient` class | Abstract `LLMProvider` + subclasses (original) | 3 classes for 1 provider adds no value; harder to read |
-| `useContext` for auth state | Redux, Zustand | 3 pages need 1 shared value; Context is the right tool |
+| `useContext` for auth state | Redux, Zustand | 4 pages need 1 shared value; Context is the right tool |
 | SQLite for tests | Dockerised PostgreSQL | Eliminates Docker dependency from test setup; SQLAlchemy handles differences |
 | Rule-based ranking + LLM curate | LLM-only ranking | LLM is non-deterministic and slow; rule-based is cheap and explainable |
 | JWT auth | Cookie sessions | Stateless; works with a separate frontend dev server (different port) |
-| Vite + React JS | Create React App / Next.js | Vite is faster; no SSR needed; JS avoids TypeScript overhead for 3 pages |
+| Vite + React JS | Create React App / Next.js | Vite is faster; no SSR needed; JS avoids TypeScript overhead for 4 pages |

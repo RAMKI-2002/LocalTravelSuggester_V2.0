@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import HistoryPage from './pages/HistoryPage'
+import FavoritesPage from './pages/FavoritesPage'
 
 function Nav() {
   const { isLoggedIn, logout, user } = useAuth()
@@ -20,6 +21,7 @@ function Nav() {
       <span className="text-lg font-bold mr-4">🗺️ Local Travel Suggester</span>
       <Link to="/dashboard" className="hover:text-indigo-200 transition-colors">Dashboard</Link>
       <Link to="/history" className="hover:text-indigo-200 transition-colors">History</Link>
+      <Link to="/favorites" className="hover:text-indigo-200 transition-colors">Favorites</Link>
       <div className="ml-auto flex items-center gap-4">
         {user && <span className="text-indigo-200 text-sm">👤 {user.username}</span>}
         <button
@@ -46,6 +48,7 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+        <Route path="/favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>

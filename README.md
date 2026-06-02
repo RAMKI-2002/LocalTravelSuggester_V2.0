@@ -16,6 +16,7 @@ Built as a complete, production-ready full-stack application following a structu
 6. AWS Bedrock generates a personalized reasoning for each suggestion
 7. Results are shown on an interactive map (Leaflet) with suggestion cards
 8. Every query is saved to your trip history (authentication required)
+9. You can save individual places to Favorites from suggestion cards and manage them on a dedicated page
 
 ---
 
@@ -28,6 +29,7 @@ backend/   (FastAPI + SQLAlchemy + Pydantic)
     ├── /auth        — register, login, profile (JWT)
     ├── /suggest-trip — full AI pipeline (auth required)
     ├── /history     — user's past queries (auth required)
+    ├── /favorites   — saved places (auth required)
     └── /health      — liveness + dependency readiness
 
 External:
@@ -74,11 +76,11 @@ LocalTravelSuggester/
 │       ├── main.py        # FastAPI app factory + lifespan
 │       ├── config.py      # Pydantic settings from .env
 │       ├── core/security.py   # JWT + bcrypt
-│       ├── api/           # routes_auth, routes_trip, routes_health
-│       ├── services/      # auth, trip, ranker, intent_parser, distance
+│       ├── api/           # routes_auth, routes_trip, routes_favorites, routes_health
+│       ├── services/      # auth, trip, favorites, ranker, intent_parser, distance
 │       ├── clients/       # llm, weather, places, overpass, geocode
 │       ├── db/            # models, database, cache
-│       ├── schemas/       # auth.py, trip.py
+│       ├── schemas/       # auth.py, trip.py, favorites.py
 │       └── utils/logger.py
 ├── frontend/
 │   ├── package.json
@@ -87,11 +89,12 @@ LocalTravelSuggester/
 │       ├── api.js         # All backend API calls in one file
 │       ├── context/AuthContext.jsx
 │       ├── App.jsx
-│       └── pages/         # LoginPage, DashboardPage, HistoryPage
+│       └── pages/         # LoginPage, DashboardPage, HistoryPage, FavoritesPage
 └── tests/
     ├── conftest.py        # Fixtures: TestClient, registered_user, auth_headers
     ├── test_auth.py
     ├── test_trip.py
+    ├── test_favorites.py
     ├── test_health.py
     └── services/
         ├── test_ranker.py
@@ -230,6 +233,9 @@ Full interactive docs at `/docs` when the backend is running.
 | GET | `/auth/me` | Yes | Current user profile |
 | POST | `/suggest-trip` | Yes | Get AI trip recommendations |
 | GET | `/history` | Yes | User's past queries |
+| POST | `/favorites` | Yes | Save a place to favorites |
+| GET | `/favorites` | Yes | List saved places |
+| DELETE | `/favorites/{id}` | Yes | Remove a saved place (404 if missing or not owned) |
 | GET | `/health` | No | Liveness check |
 | GET | `/health/detailed` | No | All dependency statuses |
 
@@ -264,7 +270,7 @@ Full interactive docs at `/docs` when the backend is running.
 | Auth | JWT (python-jose) | Stateless; one-line dependency injection via `Depends()` |
 | Password hashing | direct `bcrypt` (not passlib) | passlib 1.7.x is incompatible with bcrypt 4.x |
 | LLM abstraction | Single `LLMClient` class | One provider, one mock — abstract class added no value |
-| Frontend state | React Context + localStorage | 3 pages, one shared auth state — Redux is overkill |
+| Frontend state | React Context + localStorage | 4 pages, one shared auth state — Redux is overkill |
 | Database | SQLite (dev) / PostgreSQL (prod) | SQLAlchemy abstracts the difference; SQLite needs zero setup |
 | Place fallback | Foursquare → Overpass | Overpass (OpenStreetMap) is free, rate-limit-free, globally available |
 

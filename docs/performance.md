@@ -131,6 +131,7 @@ Nominatim enforces 1 request/second for anonymous users. Under concurrent load, 
 | `users` | `username` (unique) | lookup on login |
 | `users` | `email` (unique) | lookup on register |
 | `query_history` | `user_id` | history endpoint filter |
+| `user_favorites` | `user_id` | favorites list/delete filter |
 | `place_cache` | `(city, category, source)` | cache lookup |
 | `weather_log` | `(city, logged_at)` | TTL-aware lookup |
 

@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import routes_auth, routes_health, routes_trip
+from app.api import routes_auth, routes_favorites, routes_health, routes_trip
 from app.config import get_settings
 from app.db.database import init_db
 from app.utils.logger import RequestIdMiddleware, configure_logging
@@ -62,6 +62,7 @@ def create_app() -> FastAPI:
 
     app.include_router(routes_auth.router)
     app.include_router(routes_trip.router)
+    app.include_router(routes_favorites.router)
     app.include_router(routes_health.router)
 
     @app.get("/", include_in_schema=False)

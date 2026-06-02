@@ -69,6 +69,37 @@ export async function getHistory(limit = 20) {
   return handleResponse(resp)
 }
 
+export async function addFavorite(place, city) {
+  const resp = await fetch(`${BASE}/favorites`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ place, city }),
+  })
+  if (resp.status === 409) {
+    const err = await resp.json()
+    const conflict = new Error(err.detail || 'Place already saved')
+    conflict.status = 409
+    throw conflict
+  }
+  return handleResponse(resp)
+}
+
+export async function getFavorites(limit = 20) {
+  const resp = await fetch(`${BASE}/favorites?limit=${limit}`, {
+    headers: authHeaders(),
+  })
+  return handleResponse(resp)
+}
+
+export async function deleteFavorite(id) {
+  const resp = await fetch(`${BASE}/favorites/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  if (resp.status === 204) return
+  return handleResponse(resp)
+}
+
 export async function getHealthDetailed() {
   const resp = await fetch(`${BASE}/health/detailed`)
   return handleResponse(resp)

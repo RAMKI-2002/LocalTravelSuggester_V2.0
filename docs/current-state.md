@@ -121,6 +121,9 @@ LocalTravelSuggester/
 | GET | `/logs` | In-memory log ring buffer |
 | POST | `/suggest-trip` | Main recommendation pipeline |
 | GET | `/history` | Last N query summaries |
+| POST | `/favorites` | Save a place to user favorites |
+| GET | `/favorites` | List user's saved places |
+| DELETE | `/favorites/{id}` | Remove a saved place |
 
 ---
 
