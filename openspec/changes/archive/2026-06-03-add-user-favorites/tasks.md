@@ -77,6 +77,6 @@ Use `client`, `auth_headers`, and two-user setup pattern from `tests/test_trip.p
 
 ## 11. Post-ship OpenSpec (after feat commit — not during apply)
 
-- [ ] 11.1 Run `/opsx-archive add-user-favorites` after implementation is committed
-- [ ] 11.2 Verify `openspec/specs/user-favorites/spec.md` has a filled **Purpose** (not TBD) describing user-scoped place bookmarks from trip suggestions
+- [x] 11.1 Run `/opsx-archive add-user-favorites` after implementation is committed
+- [x] 11.2 Verify `openspec/specs/user-favorites/spec.md` has a filled **Purpose** (not TBD) describing user-scoped place bookmarks from trip suggestions
 - [ ] 11.3 Commit archive move: `chore: archive OpenSpec change add-user-favorites`
