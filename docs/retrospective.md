@@ -19,7 +19,7 @@ The rebuild followed a strict 6-stage process:
 | 2 — Technical Plan | `plan.md`, `tasks.md`, `architecture.md` | ✅ |
 | 3 — AI Tooling | `.cursor/rules/`, `AGENTS.md` | ✅ |
 | 4 — Implementation | Full backend + frontend + ≥70% test coverage + 3 harness traces | ✅ |
-| 5 — Change Management | 2 change records (`CHG-001`, `CHG-002`) | ✅ |
+| 5 — Change Management | OpenSpec spec-driven change (`remove-budget-estimation` archived) | ✅ |
 | 6 — Quality Assurance | `performance.md`, `security.md`, `code-review.md` | ✅ |
 | Retro — Retrospective | This document | ✅ |
 

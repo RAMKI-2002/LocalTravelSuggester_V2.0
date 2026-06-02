@@ -53,8 +53,13 @@ LocalTravelSuggester/
 │   ├── rules/             # Cursor coding rules (project, fastapi, testing)
 │   └── skills/            # Custom Cursor skills (test-writer)
 ├── specs/                 # Requirements spec, technical plan, task breakdown
-├── openspec/changes/      # Change management records (CHG-001, CHG-002)
+├── openspec/
+│   ├── specs/             # Main capability specs (e.g. trip-suggestion)
+│   └── changes/
+│       └── archive/       # Completed changes (e.g. 2026-06-02-remove-budget-estimation)
 ├── docs/
+│   ├── superpowers/       # Brainstorming design docs
+│   │   └── specs/
 │   ├── current-state.md   # Stage 0 audit
 │   ├── architecture.md    # Full architecture + decision rationale
 │   ├── performance.md     # Performance analysis + P50/P95 estimates
@@ -276,5 +281,5 @@ This project follows a structured 6-stage engineering process. For a full explan
 - **Stage 2** — Technical Plan (`specs/local-travel-suggester/plan.md`, `tasks.md`, `docs/architecture.md`)
 - **Stage 3** — AI Tooling (`.cursor/rules/`, `AGENTS.md`)
 - **Stage 4** — TDD Implementation (tests first, ≥70% coverage, `docs/harness-traces/`)
-- **Stage 5** — Change Management (`openspec/changes/CHG-001`, `CHG-002`)
+- **Stage 5** — Change Management (`openspec/` spec-driven workflow; archived example: `openspec/changes/archive/2026-06-02-remove-budget-estimation/`)
 - **Stage 6** — QA (`docs/performance.md`, `docs/security.md`, `docs/code-review.md`)

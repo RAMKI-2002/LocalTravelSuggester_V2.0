@@ -1,7 +1,9 @@
 # trip-suggestion Specification
 
 ## Purpose
-TBD - created by archiving change remove-budget-estimation. Update Purpose after archive.
+
+Defines the contract for trip suggestion results: what each place in `POST /suggest-trip` responses includes, what upstream place normalization must exclude, and what the dashboard displays. Per-place budget estimation was removed — see archived change `openspec/changes/archive/2026-06-02-remove-budget-estimation/`.
+
 ## Requirements
 ### Requirement: PlaceSuggestion response fields
 

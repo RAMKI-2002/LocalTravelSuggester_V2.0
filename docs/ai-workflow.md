@@ -122,31 +122,34 @@ The Cursor slash commands for these are in `.cursor/commands/`.
 
 ### 5. OpenSpec (`openspec`)
 
-**What it is:** A tool that tracks API changes and produces structured change records. It enforces a "change proposal → spec diff → impact analysis → tasks" discipline before any API modification.
+**What it is:** A spec-driven change workflow. Each change produces proposal, design, capability specs, and tasks artifacts before code is written. Completed changes are archived and their specs promoted to `openspec/specs/`.
 
 **How we used it:**
-- CHG-001: Adding the Favorites feature (new endpoint, new DB table)
-- CHG-002: Removing Budget Estimation (deleted feature, simplified code)
-- Each change lives in `openspec/changes/CHG-XXX-name/`
+- **`remove-budget-estimation`** — removed per-place budget from API, UI, and place clients (archived at `openspec/changes/archive/2026-06-02-remove-budget-estimation/`)
+- Main spec promoted: `openspec/specs/trip-suggestion/spec.md`
 
-**How to create a change record for a new feature:**
+**How to create a change for a new feature:**
 ```bash
-# Install:
+# Install (if not already):
 npm install -g @openspec/cli
 
-# Initialize a new change:
-openspec init
-openspec config profile set default
-openspec update
+# Create a new change (spec-driven schema):
+openspec new change "<kebab-case-name>"
 
-# Then fill in:
-# proposal.md   → what you want to change and why
-# spec-diff.md  → what the API contract looks like before and after
-# tasks.md      → what code changes are needed
-# impact.md     → what breaks, what needs re-testing
+# Generate artifacts in order: proposal → design → specs → tasks
+openspec status --change "<name>" --json
+
+# Implement against tasks.md, then archive (syncs specs to main):
+openspec archive <name> -y
 ```
 
-**Why this matters:** Without change records, API modifications accumulate silently. Six months later, no one knows why an endpoint was added or what it replaced. CHG-001 and CHG-002 are the audit trail for this project.
+Each active change lives in `openspec/changes/<name>/` with:
+- `proposal.md` — what and why
+- `design.md` — how (technical decisions)
+- `specs/<capability>/spec.md` — requirement deltas
+- `tasks.md` — implementation checklist
+
+**Why this matters:** Without structured change records, API modifications accumulate silently. The archived `remove-budget-estimation` change is the audit trail for removing `estimated_budget` from the trip suggestion contract.
 
 ---
 
@@ -161,7 +164,7 @@ Each stage has a deliverable. Nothing moves forward until the deliverable exists
 | 2 | Technical Plan | Architecture, API contracts, task breakdown | `specs/local-travel-suggester/plan.md`, `tasks.md`, `docs/architecture.md` |
 | 3 | AI Tooling | Rules, skills, agent roles | `.cursor/rules/`, `.cursor/skills/`, `AGENTS.md` |
 | 4 | Implementation | TDD — tests first, then code, ≥70% coverage | `backend/`, `frontend/`, `tests/`, `docs/harness-traces/` |
-| 5 | Change Management | Two structured change records | `openspec/changes/` |
+| 5 | Change Management | OpenSpec spec-driven changes (archived: `remove-budget-estimation`) | `openspec/changes/archive/`, `openspec/specs/` |
 | 6 | Quality Assurance | Performance, security, code review | `docs/performance.md`, `docs/security.md`, `docs/code-review.md` |
 
 ---
@@ -179,12 +182,12 @@ Open `specs/local-travel-suggester/spec.md` or create `specs/favorites/spec.md`.
 
 Do not touch code yet.
 
-### Step 2 — Create a change record
+### Step 2 — Propose an OpenSpec change
 ```bash
 # In the project root:
-openspec update
+openspec new change "<feature-name>"
 ```
-Fill in `openspec/changes/CHG-003-favorites/proposal.md` and `spec-diff.md`.
+Fill in `proposal.md`, `design.md`, `specs/<capability>/spec.md`, and `tasks.md` under `openspec/changes/<feature-name>/`.
 
 ### Step 3 — Write tests first (TDD)
 Use the test-writer skill:
@@ -212,10 +215,11 @@ pytest --cov=app --cov-report=term-missing
 ```
 Coverage must stay ≥70%. All tests must pass.
 
-### Step 6 — Update docs
+### Step 6 — Update docs and archive
 - Add the new endpoint to `docs/architecture.md`
-- Fill in `openspec/changes/CHG-003-favorites/tasks.md` and `impact.md`
-- Update `README.md` API reference table
+- Mark tasks complete in `openspec/changes/<feature-name>/tasks.md`
+- Archive the change: `openspec archive <feature-name> -y`
+- Update `README.md` API reference table if endpoints changed
 
 ---
 
