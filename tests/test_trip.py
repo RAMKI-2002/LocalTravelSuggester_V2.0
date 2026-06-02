@@ -82,6 +82,7 @@ def test_suggest_trip_happy_path(client, auth_headers):
         assert "name" in s
         assert "reasoning" in s
         assert "coords" in s
+        assert "estimated_budget" not in s
 
 
 @respx.mock

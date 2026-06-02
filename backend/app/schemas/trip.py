@@ -36,14 +36,6 @@ class Coords(BaseModel):
     lng: Optional[float] = None
 
 
-class Budget(BaseModel):
-    currency: str = "INR"
-    entry: int = 0
-    travel: Optional[int] = None
-    total: Optional[int] = None
-    note: str = ""
-
-
 class PlaceSuggestion(BaseModel):
     name: str
     description: str = ""
@@ -51,7 +43,6 @@ class PlaceSuggestion(BaseModel):
     reasoning: str
     coords: Coords
     distance_km: Optional[float] = None
-    estimated_budget: Budget
     score: float = 0.0
     website: Optional[str] = None
     address: Optional[str] = None

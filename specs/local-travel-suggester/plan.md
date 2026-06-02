@@ -53,7 +53,7 @@ trip_service.py orchestrates:
 |-------|-------|----------------|
 | API | `api/routes_auth.py`, `api/routes_trip.py`, `api/routes_health.py` | HTTP: parse request, call service, return response |
 | Core | `core/security.py` | JWT creation/verification, password hashing, `get_current_user` dependency |
-| Services | `services/auth_service.py`, `services/trip_service.py`, `services/ranker.py`, `services/intent_parser.py`, `services/budget.py`, `services/distance.py` | Business logic; no HTTP |
+| Services | `services/auth_service.py`, `services/trip_service.py`, `services/ranker.py`, `services/intent_parser.py`, `services/distance.py` | Business logic; no HTTP |
 | Clients | `clients/*.py` | Upstream API adapters; handle retries, caching, errors |
 | DB | `db/database.py`, `db/models.py`, `db/cache.py` | ORM, session factory, TTL cache helpers |
 | Schemas | `schemas/auth.py`, `schemas/trip.py` | Pydantic request/response models |
@@ -170,7 +170,6 @@ Response: {
       "reasoning": "Perfect for a peaceful evening given the clear skies at 28°C.",
       "coords": { "lat": 17.42, "lng": 78.47 },
       "distance_km": 12.3,
-      "estimated_budget": { "currency": "INR", "entry": 0, "travel": 370 },
       "score": 0.82
     }
   ],
@@ -250,7 +249,6 @@ POST /suggest-trip
   ├── Distance filter                 (>30 km from anchor → drop)
   ├── Score + rank (rule-based)       (weather + preference + popularity + proximity)
   ├── LLM curate                      (Bedrock picks best N from top 2N)
-  ├── Budget estimation               (INR, per place)
   └── Persist to query_history (user_id attached)
   │
   └─► TripResponse

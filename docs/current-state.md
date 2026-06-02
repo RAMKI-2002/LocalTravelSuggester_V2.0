@@ -30,7 +30,7 @@ POST /suggest-trip
  → [3] Overpass fallback if Foursquare fails
  → [4] Distance filter (Haversine, >30 km dropped)
  → [5] Rule-based rank → LLM curate (Bedrock)
- → [6] Budget estimation + per-place reasoning
+ → [6] Per-place reasoning
  → [7] Persist to DB → return TripResponse
 ```
 
@@ -89,7 +89,6 @@ LocalTravelSuggester/
     │   └── trip.py
     ├── services/
     │   ├── __init__.py
-    │   ├── budget.py
     │   ├── distance.py
     │   ├── intent_parser.py
     │   ├── ranker.py
@@ -209,7 +208,6 @@ The following modules are well-written and will be moved (not rewritten) into `b
 |--------|---------------|
 | `app/services/ranker.py` | Reuse — pure function, no deps, easily testable |
 | `app/services/intent_parser.py` | Reuse — well-structured, LLM-fallback pattern is correct |
-| `app/services/budget.py` | Reuse — simple INR estimation |
 | `app/services/distance.py` | Reuse — pure Haversine math |
 | `app/clients/weather_client.py` | Reuse (minor refactor to inline httpx) |
 | `app/clients/places_client.py` | Reuse (simplify circuit breaker) |

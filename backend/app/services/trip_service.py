@@ -7,7 +7,7 @@ Pipeline:
   [4] Filter      — drop candidates >30 km from anchor (Haversine)
   [5] Rank        — rule-based weighted score → shortlist of top 2N
   [6] Curate      — LLM picks best N from shortlist (ONE call); falls back to rule-based
-  [7] Enrich      — budget estimate + per-place reasoning
+  [7] Enrich      — per-place reasoning
   [8] Persist     — query_history (with user_id) → return TripResponse
 """
 
@@ -29,11 +29,10 @@ from app.clients.weather_client import WeatherClient
 from app.config import get_settings
 from app.db.models import QueryHistory
 from app.schemas.trip import (
-    Budget, Coords, PlaceSuggestion, TripIntentMeta, TripMeta,
+    Coords, PlaceSuggestion, TripIntentMeta, TripMeta,
     TripRequest, TripResponse, Weather,
 )
 from app.services import ranker
-from app.services.budget import estimate_budget
 from app.services.distance import haversine_km
 from app.services.intent_parser import TripIntent, extract_intent
 
@@ -198,10 +197,7 @@ async def suggest_trip(db: Session, req: TripRequest, user_id: Optional[int] = N
             degraded.append("llm_curate")
         final_places = ranker.rank_places(places_raw, weather_payload, effective_pref, max_results)
 
-    # [7] Enrich: budget + per-place reasoning
-    for place in final_places:
-        place["_budget"] = estimate_budget(place, place.get("_distance_km_user"))
-
+    # [7] Enrich: per-place reasoning
     needs_reasoning = [p for p in final_places if "_reasoning" not in p]
     if needs_reasoning:
         async def _reason(place: dict[str, Any]) -> None:
@@ -242,7 +238,6 @@ def _build_response(
             reasoning=p.get("_reasoning") or "",
             coords=Coords(lat=(p.get("coords") or {}).get("lat"), lng=(p.get("coords") or {}).get("lng")),
             distance_km=p.get("_distance_km_user"),
-            estimated_budget=Budget(**p.get("_budget", {"currency": "INR", "entry": 0, "note": ""})),
             score=p.get("_score", 0.0),
             website=p.get("website"),
             address=p.get("address"),

@@ -129,7 +129,7 @@
 - Call `POST /suggest-trip` on submit
 
 **G-02** — Suggestions list
-- Render each suggestion: name, categories chips, reasoning, distance, budget
+- Render each suggestion: name, categories chips, reasoning, distance
 - Weather banner at top
 - Meta info: elapsed time, cache hits, degraded warnings
 

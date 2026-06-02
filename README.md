@@ -70,7 +70,7 @@ LocalTravelSuggester/
 │       ├── config.py      # Pydantic settings from .env
 │       ├── core/security.py   # JWT + bcrypt
 │       ├── api/           # routes_auth, routes_trip, routes_health
-│       ├── services/      # auth, trip, ranker, intent_parser, budget, distance
+│       ├── services/      # auth, trip, ranker, intent_parser, distance
 │       ├── clients/       # llm, weather, places, overpass, geocode
 │       ├── db/            # models, database, cache
 │       ├── schemas/       # auth.py, trip.py

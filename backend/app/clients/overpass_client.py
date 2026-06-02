@@ -145,7 +145,6 @@ def _normalise(element: dict[str, Any]) -> Optional[dict[str, Any]]:
         "categories": _extract_categories(tags),
         "coords": {"lat": lat, "lng": lng},
         "address": address,
-        "price_tier": None,
         "rating": None,
         "popularity": None,
         "website": tags.get("website") or tags.get("contact:website"),

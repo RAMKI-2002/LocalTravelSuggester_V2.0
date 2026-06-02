@@ -32,7 +32,7 @@ DEFAULT_QUERY = "tourist attractions"
 
 FIELDS = ",".join([
     "fsq_place_id", "name", "latitude", "longitude", "location",
-    "categories", "price", "rating", "description", "popularity",
+    "categories", "rating", "description", "popularity",
     "tel", "website",
 ])
 
@@ -52,7 +52,6 @@ def _normalise(raw_place: dict[str, Any]) -> dict[str, Any]:
         "categories": [c for c in categories if c],
         "coords": {"lat": lat, "lng": lng},
         "address": (raw_place.get("location") or {}).get("formatted_address"),
-        "price_tier": raw_place.get("price"),
         "rating": raw_place.get("rating"),
         "popularity": raw_place.get("popularity"),
         "website": raw_place.get("website"),

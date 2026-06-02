@@ -75,9 +75,6 @@ function SuggestionCard({ suggestion, index }) {
           )}
           <div className="flex gap-3 mt-2 text-xs text-gray-500">
             {suggestion.distance_km != null && <span>📍 {suggestion.distance_km.toFixed(1)} km</span>}
-            {suggestion.estimated_budget?.total != null && (
-              <span>💰 ₹{suggestion.estimated_budget.total}</span>
-            )}
             {suggestion.score > 0 && <span>⭐ {(suggestion.score * 100).toFixed(0)}%</span>}
           </div>
           {suggestion.website && (

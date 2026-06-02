@@ -28,7 +28,7 @@ Local Travel Suggester is a full-stack web application that provides AI-curated 
 │  DB: users      ┌─────┴──────────────────────┐      │
 │                 │     Trip Pipeline           │      │
 │                 │  Geocode  Weather  Places   │      │
-│                 │  Rank     LLM      Budget   │      │
+│                 │  Rank     LLM               │      │
 │                 └────────────────────────────┘      │
 └──────────────┬──────────────────────────────────────┘
                │
@@ -85,7 +85,7 @@ flowchart TD
     J --> K{"LLM\nfailed?"}
     K -- Yes --> L["Rule-based top N fallback"]
     K -- No --> M["LLM-curated list with reasoning"]
-    L --> N["Budget estimation per place"]
+    L --> N["Per-place reasoning"]
     M --> N
     N --> O["Persist to query_history with user_id"]
     O --> P["Return TripResponse"]
@@ -181,7 +181,7 @@ App.jsx (router + auth guard)
 │   ├── TripForm     (city, preference, locality, max_results)
 │   ├── WeatherCard  (condition, temp, humidity)
 │   ├── SuggestionList
-│   │   └── SuggestionCard × N (name, reasoning, distance, budget, categories)
+│   │   └── SuggestionCard × N (name, reasoning, distance, categories)
 │   └── MapView      (react-leaflet, numbered pins, locality marker)
 │
 └── HistoryPage.jsx
