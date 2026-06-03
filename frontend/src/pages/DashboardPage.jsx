@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { suggestTrip, addFavorite } from '../api'
@@ -22,6 +22,15 @@ function MapFitBounds({ bounds }) {
   if (bounds && bounds.length > 0) {
     map.fitBounds(bounds, { padding: [40, 40] })
   }
+  return null
+}
+
+function MapResize({ when }) {
+  const map = useMap()
+  useEffect(() => {
+    // Leaflet caches container size at init; grid stretch won't trigger a relayout.
+    map.invalidateSize()
+  }, [map, when])
   return null
 }
 
@@ -174,7 +183,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
         {/* Left: Form + Results */}
         <div className="space-y-4">
           {/* Trip Form */}
@@ -253,9 +262,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right: Map */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden" style={{ minHeight: '500px' }}>
-          <MapContainer center={mapCenter} zoom={12} style={{ height: '100%', minHeight: '500px' }}>
+        {/* Right: Map — fixed height so grid row growth from results doesn't stretch the pane */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-[500px] lg:sticky lg:top-6">
+          <MapContainer center={mapCenter} zoom={12} className="h-full w-full">
+            <MapResize when={result} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
