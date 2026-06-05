@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
@@ -26,9 +27,22 @@ def register(data: UserCreate, db: Session = Depends(get_db)) -> Token:
 
 @router.post("/login", response_model=Token)
 def login(data: UserLogin, db: Session = Depends(get_db)) -> Token:
-    """Verify credentials and return an access token."""
+    """Verify credentials and return an access token (JSON body — used by frontend)."""
     logger.info("login: email=%r", data.email)
     return auth_service.login_user(db, data)
+
+
+@router.post("/token", response_model=Token)
+def token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+) -> Token:
+    """OAuth2 form login for Swagger UI Authorize (username = email address)."""
+    logger.info("token: email=%r", form_data.username)
+    return auth_service.login_user(
+        db,
+        UserLogin(email=form_data.username, password=form_data.password),
+    )
 
 
 @router.get("/me", response_model=UserResponse)

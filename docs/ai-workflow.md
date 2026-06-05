@@ -229,9 +229,9 @@ Coverage must stay ≥70%. All tests must pass.
 
 | Trace | What it covers |
 |-------|---------------|
-| `auth-tdd.md` | How JWT, bcrypt, and get_current_user were test-driven |
-| `llm-client-tdd.md` | How the LLM client mock was verified without AWS |
-| `ranker-tdd.md` | How the weighted scoring function was verified with unit tests |
+| `trace-01-tdd-auth.md` | How JWT, bcrypt, and get_current_user were test-driven |
+| `trace-02-llm-simplification.md` | How the LLM client mock was verified without AWS |
+| `trace-03-ranker-tdd.md` | How the weighted scoring function was verified with unit tests |
 
 Read these before modifying the auth or ranking logic — they explain decisions that are not obvious from the code alone.
 

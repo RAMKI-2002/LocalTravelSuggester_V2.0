@@ -125,7 +125,7 @@ flowchart TD
     P["User preference text"] --> R["Rule-based parser\nkeyword bucket matching"]
     R --> Q{"Strong\nmatch?"}
     Q -- Yes --> T["TripIntent: category=food, etc."]
-    Q -- No\n\"tourist\" default --> L["LLM: Bedrock extract_intent\nStructured JSON output"]
+    Q -- No, tourist default --> L["LLM: Bedrock extract_intent\nStructured JSON output"]
     L --> V["Validate + normalise\nagainst VALID_CATEGORIES"]
     V --> T
     T --> FS["Foursquare query=search_keywords"]

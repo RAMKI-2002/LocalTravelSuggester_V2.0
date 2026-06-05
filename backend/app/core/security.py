@@ -27,7 +27,8 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.db.database import get_db
 
-_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+# Swagger Authorize sends form-urlencoded; JSON login stays at POST /auth/login.
+_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 ALGORITHM = "HS256"
 
